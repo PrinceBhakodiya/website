@@ -138,6 +138,24 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('%c🚀 X4ET - Exchange for Emerging Technologies', 'font-size: 20px; font-weight: bold; color: #3b82f6;');
   console.log('%cPowered by Hono & Cloudflare Pages', 'font-size: 12px; color: #8b5cf6;');
 
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const formContents = document.querySelectorAll('.form-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const tabName = this.dataset.tab;
+      
+      // Remove active class from all tabs and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      formContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked tab and corresponding content
+      this.classList.add('active');
+      document.getElementById(`${tabName}-content`).classList.add('active');
+    });
+  });
+
   // Form submission handlers
   const buyerForm = document.getElementById('buyer-form');
   const providerForm = document.getElementById('provider-form');
