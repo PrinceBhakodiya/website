@@ -309,18 +309,297 @@ app.get('/', (c) => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section id="signup" className="cta-section">
+      {/* Registration Forms Section */}
+      <section id="signup" className="signup-section">
         <div className="container">
-          <div className="cta-content">
-            <h2 className="cta-title">START YOUR JOURNEY</h2>
-            <p className="cta-subtitle">
-              Join 1000+ enterprises and technology providers transforming industrial operations. 
-              Get matched with the perfect solutions or connect with qualified buyers.
+          <div className="signup-header">
+            <h2 className="section-title">START YOUR JOURNEY</h2>
+            <p className="section-subtitle">
+              Join 1000+ enterprises and technology providers transforming industrial operations
             </p>
-            <div className="cta-buttons">
-              <a href="#contact" className="btn btn-primary btn-large">Get Started as Buyer</a>
-              <a href="#contact" className="btn btn-secondary btn-large">Join as Provider</a>
+          </div>
+
+          <div className="forms-grid">
+            {/* Buyer Registration Form */}
+            <div className="form-card buyer-form">
+              <div className="form-header">
+                <div className="form-icon">🔍</div>
+                <h3 className="form-title">Technology Buyer Registration</h3>
+                <p className="form-subtitle">Find the perfect solutions for your industrial needs</p>
+              </div>
+
+              <form className="registration-form" id="buyer-form">
+                {/* Contact Information */}
+                <div className="form-section">
+                  <h4 className="section-heading">Contact Information</h4>
+                  <div className="form-group">
+                    <label htmlFor="buyer-name">Full Name *</label>
+                    <input type="text" id="buyer-name" name="name" required placeholder="John Doe" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-email">Email *</label>
+                    <input type="email" id="buyer-email" name="email" required placeholder="john@company.com" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-phone">Phone *</label>
+                    <input type="tel" id="buyer-phone" name="phone" required placeholder="+1 (555) 123-4567" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-company">Company Name *</label>
+                    <input type="text" id="buyer-company" name="company" required placeholder="Acme Corporation" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-title">Job Title</label>
+                    <input type="text" id="buyer-title" name="title" placeholder="VP of Operations" />
+                  </div>
+                </div>
+
+                {/* Organization Details */}
+                <div className="form-section">
+                  <h4 className="section-heading">Organization Details</h4>
+                  <div className="form-group">
+                    <label htmlFor="buyer-industry">Industry Sector *</label>
+                    <select id="buyer-industry" name="industry" required>
+                      <option value="">Select Industry</option>
+                      <option value="oil-gas">Oil & Gas</option>
+                      <option value="mining">Mining</option>
+                      <option value="power">Power Generation</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="utilities">Utilities</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-size">Company Size</label>
+                    <select id="buyer-size" name="size">
+                      <option value="">Select Size</option>
+                      <option value="1-50">1-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-1000">201-1000 employees</option>
+                      <option value="1001-5000">1001-5000 employees</option>
+                      <option value="5000+">5000+ employees</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Project Information */}
+                <div className="form-section">
+                  <h4 className="section-heading">Project Information</h4>
+                  <div className="form-group">
+                    <label htmlFor="buyer-stage">Project Stage *</label>
+                    <select id="buyer-stage" name="stage" required>
+                      <option value="">Select Stage</option>
+                      <option value="idea">Idea / Concept</option>
+                      <option value="research">Research Phase</option>
+                      <option value="rfp">RFP / Procurement</option>
+                      <option value="pilot">Pilot / POC</option>
+                      <option value="deployment">Ready for Deployment</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-budget">Budget Range *</label>
+                    <select id="buyer-budget" name="budget" required>
+                      <option value="">Select Budget</option>
+                      <option value="under-50k">Under $50K</option>
+                      <option value="50k-100k">$50K - $100K</option>
+                      <option value="100k-500k">$100K - $500K</option>
+                      <option value="500k-1m">$500K - $1M</option>
+                      <option value="1m+">$1M+</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-timeline">Project Timeline</label>
+                    <select id="buyer-timeline" name="timeline">
+                      <option value="">Select Timeline</option>
+                      <option value="immediate">Immediate (1-3 months)</option>
+                      <option value="short">Short term (3-6 months)</option>
+                      <option value="medium">Medium term (6-12 months)</option>
+                      <option value="long">Long term (12+ months)</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-technology">Technology Interest *</label>
+                    <select id="buyer-technology" name="technology" required>
+                      <option value="">Select Primary Interest</option>
+                      <option value="ai-software">AI Software</option>
+                      <option value="ai-hardware">AI Hardware</option>
+                      <option value="iot">IoT Devices & Sensors</option>
+                      <option value="video-analytics">Video Analytics</option>
+                      <option value="robotics">Robotics & Automation</option>
+                      <option value="drones">Drones & Counter-Drone</option>
+                      <option value="edge">Edge Computing</option>
+                      <option value="digital-twins">Digital Twins</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="buyer-description">Project Description *</label>
+                    <textarea id="buyer-description" name="description" required rows={4} placeholder="Describe your project requirements and goals (max 500 characters)"></textarea>
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-primary btn-block">
+                  Submit Buyer Registration
+                </button>
+              </form>
+            </div>
+
+            {/* Provider Registration Form */}
+            <div className="form-card provider-form">
+              <div className="form-header">
+                <div className="form-icon">🚀</div>
+                <h3 className="form-title">Technology Provider Registration</h3>
+                <p className="form-subtitle">Connect with enterprise buyers seeking your solutions</p>
+              </div>
+
+              <form className="registration-form" id="provider-form">
+                {/* Contact Information */}
+                <div className="form-section">
+                  <h4 className="section-heading">Contact Information</h4>
+                  <div className="form-group">
+                    <label htmlFor="provider-name">Full Name *</label>
+                    <input type="text" id="provider-name" name="name" required placeholder="Jane Smith" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-email">Email *</label>
+                    <input type="email" id="provider-email" name="email" required placeholder="jane@techprovider.com" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-phone">Phone *</label>
+                    <input type="tel" id="provider-phone" name="phone" required placeholder="+1 (555) 987-6543" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-company">Company Name *</label>
+                    <input type="text" id="provider-company" name="company" required placeholder="TechSolutions Inc." />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-website">Company Website *</label>
+                    <input type="url" id="provider-website" name="website" required placeholder="https://techsolutions.com" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-title">Job Title</label>
+                    <input type="text" id="provider-title" name="title" placeholder="CEO / Sales Director" />
+                  </div>
+                </div>
+
+                {/* Company Details */}
+                <div className="form-section">
+                  <h4 className="section-heading">Company Details</h4>
+                  <div className="form-group">
+                    <label htmlFor="provider-type">Seller Type *</label>
+                    <select id="provider-type" name="type" required>
+                      <option value="">Select Type</option>
+                      <option value="manufacturer">Technology Manufacturer</option>
+                      <option value="vendor">Solution Vendor</option>
+                      <option value="integrator">System Integrator</option>
+                      <option value="consultant">Consulting Firm</option>
+                      <option value="service">Managed Service Provider</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-size">Company Size *</label>
+                    <select id="provider-size" name="size" required>
+                      <option value="">Select Size</option>
+                      <option value="1-10">1-10 employees</option>
+                      <option value="11-50">11-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-500">201-500 employees</option>
+                      <option value="500+">500+ employees</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-established">Year Established *</label>
+                    <input type="number" id="provider-established" name="established" required min="1900" max="2026" placeholder="2020" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-region">Geographic Coverage *</label>
+                    <select id="provider-region" name="region" required>
+                      <option value="">Select Primary Region</option>
+                      <option value="north-america">North America</option>
+                      <option value="europe">Europe</option>
+                      <option value="asia-pacific">Asia Pacific</option>
+                      <option value="middle-east">Middle East</option>
+                      <option value="africa">Africa</option>
+                      <option value="global">Global</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Offerings */}
+                <div className="form-section">
+                  <h4 className="section-heading">Offerings</h4>
+                  <div className="form-group">
+                    <label htmlFor="provider-category">Primary Technology Category *</label>
+                    <select id="provider-category" name="category" required>
+                      <option value="">Select Category</option>
+                      <option value="ai-software">AI Software</option>
+                      <option value="ai-hardware">AI Hardware</option>
+                      <option value="iot">IoT Devices & Sensors</option>
+                      <option value="video-analytics">Video Analytics & Vision AI</option>
+                      <option value="robotics">Robotics & Automation</option>
+                      <option value="drones">Drones & Counter-Drone</option>
+                      <option value="edge">Edge Computing</option>
+                      <option value="digital-twins">Digital Twins & Simulation</option>
+                      <option value="ar-vr">AR / VR / MR</option>
+                      <option value="cybersecurity">Cybersecurity (OT + AI)</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-industries">Target Industries *</label>
+                    <select id="provider-industries" name="industries" required>
+                      <option value="">Select Primary Industry</option>
+                      <option value="oil-gas">Oil & Gas</option>
+                      <option value="mining">Mining</option>
+                      <option value="power">Power Generation</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="utilities">Utilities</option>
+                      <option value="all">All Industries</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-services">Key Products / Services *</label>
+                    <textarea id="provider-services" name="services" required rows={4} placeholder="Describe your main products, services, and unique value proposition (max 500 characters)"></textarea>
+                  </div>
+                </div>
+
+                {/* Business Information */}
+                <div className="form-section">
+                  <h4 className="section-heading">Business Information</h4>
+                  <div className="form-group">
+                    <label htmlFor="provider-pricing">Pricing Model</label>
+                    <select id="provider-pricing" name="pricing">
+                      <option value="">Select Pricing Model</option>
+                      <option value="subscription">Subscription / SaaS</option>
+                      <option value="perpetual">Perpetual License</option>
+                      <option value="project">Project-based</option>
+                      <option value="usage">Usage-based</option>
+                      <option value="custom">Custom Pricing</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-project-size">Typical Project Size</label>
+                    <select id="provider-project-size" name="projectSize">
+                      <option value="">Select Range</option>
+                      <option value="under-50k">Under $50K</option>
+                      <option value="50k-100k">$50K - $100K</option>
+                      <option value="100k-500k">$100K - $500K</option>
+                      <option value="500k+">$500K+</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="provider-references">References Available?</label>
+                    <select id="provider-references" name="references">
+                      <option value="">Select Option</option>
+                      <option value="yes">Yes, can provide references</option>
+                      <option value="nda">Yes, under NDA</option>
+                      <option value="no">Not at this time</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-secondary btn-block">
+                  Submit Provider Registration
+                </button>
+              </form>
             </div>
           </div>
         </div>

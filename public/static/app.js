@@ -137,4 +137,95 @@ document.addEventListener('DOMContentLoaded', function() {
   // Console greeting
   console.log('%c🚀 X4ET - Exchange for Emerging Technologies', 'font-size: 20px; font-weight: bold; color: #3b82f6;');
   console.log('%cPowered by Hono & Cloudflare Pages', 'font-size: 12px; color: #8b5cf6;');
+
+  // Form submission handlers
+  const buyerForm = document.getElementById('buyer-form');
+  const providerForm = document.getElementById('provider-form');
+
+  if (buyerForm) {
+    buyerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Collect form data
+      const formData = new FormData(buyerForm);
+      const data = Object.fromEntries(formData.entries());
+      
+      console.log('Buyer Registration Data:', data);
+      
+      // Show success message
+      showFormSuccess(buyerForm, 'Buyer');
+      
+      // Reset form
+      buyerForm.reset();
+    });
+  }
+
+  if (providerForm) {
+    providerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Collect form data
+      const formData = new FormData(providerForm);
+      const data = Object.fromEntries(formData.entries());
+      
+      console.log('Provider Registration Data:', data);
+      
+      // Show success message
+      showFormSuccess(providerForm, 'Provider');
+      
+      // Reset form
+      providerForm.reset();
+    });
+  }
+
+  // Success message display
+  function showFormSuccess(form, type) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'form-success-message';
+    successDiv.innerHTML = `
+      <div class="success-icon">✓</div>
+      <h4>Registration Submitted!</h4>
+      <p>Thank you for registering as a ${type}. We'll review your information and contact you within 24-48 hours.</p>
+    `;
+    
+    // Style the success message
+    successDiv.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(16, 185, 129, 0.95);
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 2.5rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4);
+      z-index: 10000;
+      text-align: center;
+      max-width: 500px;
+      animation: slideInDown 0.4s ease;
+    `;
+    
+    document.body.appendChild(successDiv);
+    
+    // Remove after 4 seconds
+    setTimeout(() => {
+      successDiv.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => {
+        document.body.removeChild(successDiv);
+      }, 300);
+    }, 4000);
+  }
+
+  // Form validation enhancement
+  const inputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+  inputs.forEach(input => {
+    input.addEventListener('blur', function() {
+      if (!this.validity.valid) {
+        this.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      } else {
+        this.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+      }
+    });
+  });
 });
