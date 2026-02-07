@@ -1,15 +1,17 @@
 import { Handler } from '@netlify/functions'
-import app from '../../dist/index.js'
+import app from './app.js'
 
 export const handler: Handler = async (event, context) => {
   try {
-    const request = new Request(event.rawUrl, {
+    const url = event.rawUrl || `https://${event.headers.host}${event.path}`
+
+    const request = new Request(url, {
       method: event.httpMethod,
       headers: new Headers(event.headers as Record<string, string>),
-      body: event.body || undefined,
+      body: event.body ? (event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body) : undefined,
     })
 
-    // Create a mock environment for Netlify
+    // Create environment object for Netlify
     const env = {
       SMTP_HOST: process.env.SMTP_HOST,
       SMTP_PORT: process.env.SMTP_PORT,
@@ -22,27 +24,39 @@ export const handler: Handler = async (event, context) => {
       EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS,
     }
 
-    // Add env to context
+    // Add execution context
     const ctx = {
       env,
       executionCtx: {
-        waitUntil: () => {},
+        waitUntil: (promise: Promise<any>) => promise,
         passThroughOnException: () => {},
       },
     }
 
-    const response = await app.fetch(request, env, ctx)
+    const response = await app.default.fetch(request, env, ctx)
+
+    // Convert Headers to plain object
+    const headers: Record<string, string> = {}
+    response.headers.forEach((value, key) => {
+      headers[key] = value
+    })
 
     return {
       statusCode: response.status,
-      headers: Object.fromEntries(response.headers.entries()),
+      headers,
       body: await response.text(),
     }
   } catch (error) {
     console.error('Function error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }),
     }
   }
 }
