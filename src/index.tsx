@@ -1,6 +1,12 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
 import { serveStatic } from 'hono/cloudflare-workers'
+import { sendEmail } from './services/emailService'
+import {
+  getBuyerThankYouEmail,
+  getProviderThankYouEmail,
+  getAdminNotificationEmail,
+} from './templates/emailTemplates'
 
 const app = new Hono()
 
@@ -8,6 +14,113 @@ const app = new Hono()
 app.use('/static/*', serveStatic({ root: './public' }))
 
 app.use(renderer)
+
+// API endpoint for form submissions
+app.post('/api/submit-form', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { formType, data } = body
+
+    if (!formType || !data) {
+      return c.json({ success: false, error: 'Missing required fields' }, 400)
+    }
+
+    // Log the submission immediately
+    console.log(`📝 New ${formType} registration:`, {
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      timestamp: new Date().toISOString()
+    })
+
+    const env = c.env as any
+
+    // Check if SMTP is configured
+    const isEmailConfigured = env.SMTP_USER && env.SMTP_PASS && env.SMTP_HOST
+
+    if (!isEmailConfigured) {
+      console.warn('⚠️  Email not configured. Skipping email sending.')
+      console.log('💡 To enable emails, configure SMTP settings in .env file')
+
+      return c.json({
+        success: true,
+        message: 'Form submitted successfully (emails not configured)',
+        emailsSkipped: true,
+        data: {
+          formType,
+          name: data.name,
+          email: data.email,
+          company: data.company
+        }
+      })
+    }
+
+    // Send emails in background (non-blocking with timeout)
+    const adminEmail = env.ADMIN_EMAIL || 'admin@x4et.com'
+
+    // Fire and forget - don't wait for emails to complete
+    const emailPromises = []
+
+    if (formType === 'buyer') {
+      emailPromises.push(
+        sendEmail(
+          data.email,
+          'Welcome to X4ET - Your Registration is Confirmed',
+          getBuyerThankYouEmail(data),
+          env
+        ).catch(err => {
+          console.error('User email failed:', err)
+          return false
+        })
+      )
+    } else if (formType === 'provider') {
+      emailPromises.push(
+        sendEmail(
+          data.email,
+          'Welcome to X4ET Provider Network',
+          getProviderThankYouEmail(data),
+          env
+        ).catch(err => {
+          console.error('User email failed:', err)
+          return false
+        })
+      )
+    }
+
+    emailPromises.push(
+      sendEmail(
+        adminEmail,
+        `New ${formType === 'buyer' ? 'Buyer' : 'Provider'} Registration - ${data.name} (${data.company})`,
+        getAdminNotificationEmail(formType, data),
+        env
+      ).catch(err => {
+        console.error('Admin email failed:', err)
+        return false
+      })
+    )
+
+    // Send emails in background - don't wait
+    Promise.all(emailPromises).then(results => {
+      console.log(`✉️  Email results: User=${results[0]}, Admin=${results[1]}`)
+    })
+
+    // Return immediately without waiting for emails
+    return c.json({
+      success: true,
+      message: 'Form submitted successfully. Emails are being sent.',
+      emailsQueued: true,
+      data: {
+        formType,
+        name: data.name,
+        email: data.email,
+        company: data.company
+      }
+    })
+  } catch (error) {
+    console.error('Form submission error:', error)
+    return c.json({ success: false, error: 'Internal server error' }, 500)
+  }
+})
 
 app.get('/', (c) => {
   return c.render(

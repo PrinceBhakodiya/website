@@ -161,38 +161,110 @@ document.addEventListener('DOMContentLoaded', function() {
   const providerForm = document.getElementById('provider-form');
 
   if (buyerForm) {
-    buyerForm.addEventListener('submit', function(e) {
+    buyerForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
       // Collect form data
       const formData = new FormData(buyerForm);
       const data = Object.fromEntries(formData.entries());
-      
+
       console.log('Buyer Registration Data:', data);
-      
-      // Show success message
-      showFormSuccess(buyerForm, 'Buyer');
-      
-      // Reset form
-      buyerForm.reset();
+
+      // Show loading state
+      const submitButton = buyerForm.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+
+      try {
+        // Submit to API
+        const response = await fetch('/api/submit-form', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            formType: 'buyer',
+            data: data
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Form submitted successfully:', result);
+
+          // Show success message
+          showFormSuccess(buyerForm, 'Buyer');
+
+          // Reset form
+          buyerForm.reset();
+        } else {
+          console.error('Form submission failed:', result);
+          showFormError(buyerForm, result.error || 'Submission failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        showFormError(buyerForm, 'Network error. Please check your connection and try again.');
+      } finally {
+        // Restore button state
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
     });
   }
 
   if (providerForm) {
-    providerForm.addEventListener('submit', function(e) {
+    providerForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
       // Collect form data
       const formData = new FormData(providerForm);
       const data = Object.fromEntries(formData.entries());
-      
+
       console.log('Provider Registration Data:', data);
-      
-      // Show success message
-      showFormSuccess(providerForm, 'Provider');
-      
-      // Reset form
-      providerForm.reset();
+
+      // Show loading state
+      const submitButton = providerForm.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+
+      try {
+        // Submit to API
+        const response = await fetch('/api/submit-form', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            formType: 'provider',
+            data: data
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Form submitted successfully:', result);
+
+          // Show success message
+          showFormSuccess(providerForm, 'Provider');
+
+          // Reset form
+          providerForm.reset();
+        } else {
+          console.error('Form submission failed:', result);
+          showFormError(providerForm, result.error || 'Submission failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        showFormError(providerForm, 'Network error. Please check your connection and try again.');
+      } finally {
+        // Restore button state
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
     });
   }
 
@@ -205,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <h4>Registration Submitted!</h4>
       <p>Thank you for registering as a ${type}. We'll review your information and contact you within 24-48 hours.</p>
     `;
-    
+
     // Style the success message
     successDiv.style.cssText = `
       position: fixed;
@@ -223,9 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
       max-width: 500px;
       animation: slideInDown 0.4s ease;
     `;
-    
+
     document.body.appendChild(successDiv);
-    
+
     // Remove after 4 seconds
     setTimeout(() => {
       successDiv.style.animation = 'fadeOut 0.3s ease';
@@ -233,6 +305,47 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(successDiv);
       }, 300);
     }, 4000);
+  }
+
+  // Error message display
+  function showFormError(form, errorMessage) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'form-error-message';
+    errorDiv.innerHTML = `
+      <div class="error-icon">✕</div>
+      <h4>Submission Failed</h4>
+      <p>${errorMessage}</p>
+    `;
+
+    // Style the error message
+    errorDiv.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(239, 68, 68, 0.95);
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 2.5rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4);
+      z-index: 10000;
+      text-align: center;
+      max-width: 500px;
+      animation: slideInDown 0.4s ease;
+    `;
+
+    document.body.appendChild(errorDiv);
+
+    // Remove after 5 seconds
+    setTimeout(() => {
+      errorDiv.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => {
+        if (document.body.contains(errorDiv)) {
+          document.body.removeChild(errorDiv);
+        }
+      }, 300);
+    }, 5000);
   }
 
   // Form validation enhancement

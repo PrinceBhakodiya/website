@@ -14,7 +14,9 @@
     "git:commit": "git add . && git commit -m"
   },
   "dependencies": {
-    "hono": "^4.11.3"
+    "@types/nodemailer": "^7.0.9",
+    "hono": "^4.11.3",
+    "nodemailer": "^8.0.0"
   },
   "devDependencies": {
     "@hono/vite-build": "^1.2.0",
