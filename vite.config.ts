@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  // For local development, serve as a regular web app
+  server: {
+    port: 5173
+  },
   build: {
     lib: {
       entry: './src/index.tsx',
