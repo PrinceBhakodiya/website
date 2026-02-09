@@ -11,8 +11,7 @@ frontend:
     baseDirectory: .
     files:
       - 'index.html'
-      - 'dist/**/*'
-      - 'public/**/*'
+      - 'static/**/*'
   cache:
     paths:
       - node_modules/**/*
