@@ -1,20 +1,22 @@
-import devServer from '@hono/vite-dev-server'
-import adapter from '@hono/vite-dev-server/cloudflare'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  plugins: [
-    devServer({
-      adapter,
-      entry: 'src/index.tsx'
-    })
-  ],
   build: {
-    ssr: 'src/index.tsx',
+    lib: {
+      entry: './src/index.tsx',
+      formats: ['es'],
+      fileName: 'index'
+    },
     rollupOptions: {
-      output: {
-        format: 'es'
-      }
-    }
+      external: [
+        'hono',
+        'hono/jsx-renderer',
+        'hono/jsx/jsx-runtime',
+        'hono/cloudflare-workers',
+        'nodemailer'
+      ]
+    },
+    outDir: 'dist',
+    emptyOutDir: true
   }
 })
