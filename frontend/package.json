@@ -1,0 +1,13 @@
+{
+  "name": "x4et-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "python3 -m http.server 5173 --directory .",
+    "build": "npx tailwindcss -i ./src/input.css -o ./public/static/style.css --minify"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
+  }
+}
