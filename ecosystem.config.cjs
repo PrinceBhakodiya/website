@@ -2,15 +2,24 @@ module.exports = {
   apps: [
     {
       name: 'x4et-webapp',
-      script: 'npx',
-      args: 'wrangler pages dev dist --ip 0.0.0.0 --port 3000',
+      script: 'server.js',
       env: {
-        NODE_ENV: 'development',
+        NODE_ENV: 'production',
+        PORT: 3000
+      },
+      env_production: {
+        NODE_ENV: 'production',
         PORT: 3000
       },
       watch: false,
       instances: 1,
-      exec_mode: 'fork'
+      exec_mode: 'fork',
+      autorestart: true,
+      max_memory_restart: '1G',
+      error_file: 'logs/err.log',
+      out_file: 'logs/out.log',
+      log_file: 'logs/combined.log',
+      time: true
     }
   ]
 }
