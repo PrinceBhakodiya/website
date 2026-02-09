@@ -1,0 +1,5 @@
+# Serve static files directly
+/static/*  /static/:splat  200
+
+# All other routes serve index.html (SPA fallback)
+/*  /index.html  200

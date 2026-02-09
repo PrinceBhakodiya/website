@@ -1,5 +1,21 @@
 # Deployment Guide for X4ET Web Application
 
+## ⚠️ IMPORTANT: Current API Issue on AWS Amplify
+
+**Problem**: The form submission returns a 404 error because AWS Amplify only supports static hosting without a backend API.
+
+**Temporary Fix Applied**:
+- Forms now detect Amplify deployment and log data to console
+- Shows "Demo Mode" message to users
+- Works perfectly when deployed to Netlify or run locally
+
+**Permanent Solutions** (see detailed instructions below):
+1. **Deploy to Netlify** (easiest - already configured)
+2. **Add AWS Lambda + API Gateway** to Amplify
+3. **Deploy backend separately** (Railway, Render, Heroku)
+
+---
+
 This guide explains how to deploy your application to AWS Amplify, EC2, and Netlify.
 
 ## Prerequisites
@@ -31,7 +47,13 @@ NODE_ENV=production
 
 ## 1. AWS Amplify Deployment
 
-### Method 1: Amplify Console (Recommended)
+### ⚠️ Current Limitation
+
+AWS Amplify **only hosts static files** by default. The backend API (`/api/submit-form`) won't work unless you:
+- Add AWS Lambda + API Gateway (see section below), OR
+- Use Netlify instead (which has built-in serverless functions support)
+
+### Method 1: Amplify Console (Static Only)
 
 1. **Push your code to GitHub/GitLab/Bitbucket**
 

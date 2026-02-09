@@ -177,6 +177,25 @@ document.addEventListener('DOMContentLoaded', function() {
       submitButton.textContent = 'Submitting...';
 
       try {
+        // Check if running on Amplify (static hosting without backend)
+        const isAmplify = window.location.hostname.includes('amplifyapp.com');
+
+        if (isAmplify) {
+          // For now, just log the data and show success message
+          console.log('📝 Form submission (static mode):', data);
+
+          // Show success message
+          showFormSuccess(buyerForm, 'Buyer');
+
+          // Reset form
+          buyerForm.reset();
+
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+
+          return;
+        }
+
         // Submit to API
         const response = await fetch('/api/submit-form', {
           method: 'POST',
@@ -231,6 +250,25 @@ document.addEventListener('DOMContentLoaded', function() {
       submitButton.textContent = 'Submitting...';
 
       try {
+        // Check if running on Amplify (static hosting without backend)
+        const isAmplify = window.location.hostname.includes('amplifyapp.com');
+
+        if (isAmplify) {
+          // For now, just log the data and show success message
+          console.log('📝 Form submission (static mode):', data);
+
+          // Show success message
+          showFormSuccess(providerForm, 'Provider');
+
+          // Reset form
+          providerForm.reset();
+
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+
+          return;
+        }
+
         // Submit to API
         const response = await fetch('/api/submit-form', {
           method: 'POST',
@@ -270,13 +308,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Success message display
   function showFormSuccess(form, type) {
+    const isAmplify = window.location.hostname.includes('amplifyapp.com');
     const successDiv = document.createElement('div');
     successDiv.className = 'form-success-message';
-    successDiv.innerHTML = `
-      <div class="success-icon">✓</div>
-      <h4>Registration Submitted!</h4>
-      <p>Thank you for registering as a ${type}. We'll review your information and contact you within 24-48 hours.</p>
-    `;
+
+    if (isAmplify) {
+      // Static mode - inform user data is logged only
+      successDiv.innerHTML = `
+        <div class="success-icon">✓</div>
+        <h4>Form Submitted (Demo Mode)</h4>
+        <p>Your ${type} registration has been logged to the console. In production, this would be sent to our backend API and you'd receive a confirmation email.</p>
+      `;
+    } else {
+      // Full backend mode
+      successDiv.innerHTML = `
+        <div class="success-icon">✓</div>
+        <h4>Registration Submitted!</h4>
+        <p>Thank you for registering as a ${type}. We'll review your information and contact you within 24-48 hours.</p>
+      `;
+    }
 
     // Style the success message
     successDiv.style.cssText = `
