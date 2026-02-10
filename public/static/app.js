@@ -1,3 +1,6 @@
+// Backend API base (default: http://localhost:3002/api). Override with window.API_BASE_URL in HTML if needed.
+var API_BASE = (typeof window !== 'undefined' && window.API_BASE_URL !== undefined) ? window.API_BASE_URL : 'http://localhost:3002/api';
+
 // Smooth scrolling navigation
 document.addEventListener('DOMContentLoaded', function() {
   // Navbar scroll effect
@@ -196,8 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        // Submit to API
-        const response = await fetch('/api/submit-form', {
+        // Submit to API (backend at localhost:3002/api/submit-form)
+        const response = await fetch(API_BASE + '/submit-form', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -269,8 +272,8 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        // Submit to API
-        const response = await fetch('/api/submit-form', {
+        // Submit to API (backend at localhost:3002/api/submit-form)
+        const response = await fetch(API_BASE + '/submit-form', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

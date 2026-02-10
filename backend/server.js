@@ -1,147 +1,153 @@
-import { Hono } from 'hono'
-import { serve } from '@hono/node-server'
-import { cors } from 'hono/cors'
-import { sendEmail } from './src/services/emailService.js'
+import express from 'express'
+import http from 'http'
+import cors from 'cors'
+import dotenv from 'dotenv'
+
+import { sendMail } from './src/services/emailService.js'
 import {
   getBuyerThankYouEmail,
   getProviderThankYouEmail,
   getAdminNotificationEmail,
 } from './src/templates/emailTemplates.js'
 
-const app = new Hono()
+dotenv.config()
 
-// Enable CORS for frontend
-app.use('/*', cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-}))
+const app = express()
 
-// Health check endpoint
-app.get('/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+/* -------------------- Middleware -------------------- */
+app.use(express.json())
+
+const allowedOrigin = process.env.FRONTEND_URL
+
+console.log(`🌐 CORS allowed origin: ${allowedOrigin || 'localhost (dev)'}`)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      if (allowedOrigin) return callback(null, allowedOrigin)
+      if (
+        origin.startsWith('http://localhost') ||
+        origin.startsWith('http://127.0.0.1')
+      ) {
+        return callback(null, true)
+      }
+      callback(null, false)
+    },
+    credentials: true,
+  })
+)
+
+/* -------------------- Health -------------------- */
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// API endpoint for form submissions
-app.post('/api/submit-form', async (c) => {
-  try {
-    const body = await c.req.json()
-    const { formType, data } = body
+/* -------------------- API Info -------------------- */
+app.get('/api', (_req, res) => {
+  res.json({
+    message: 'X4ET Backend API',
+    endpoints: {
+      'POST /api/submit-form': 'Generic form submit',
+      'POST /api/registrations/buyer': 'Buyer registration',
+      'POST /api/registrations/provider': 'Provider registration',
+    },
+  })
+})
 
-    if (!formType || !data) {
-      return c.json({ success: false, error: 'Missing required fields' }, 400)
+/* -------------------- Helper -------------------- */
+async function handleFormSubmission(res, formType, data) {
+  try {
+    if (!data) {
+      return res.status(400).json({ success: false, error: 'Missing request body' })
     }
 
-    // Log the submission immediately
-    console.log(`📝 New ${formType} registration:`, {
+    const requiredFields =
+      formType === 'buyer'
+        ? ['name', 'email', 'phone', 'company', 'industry', 'technology', 'budget', 'stage', 'description']
+        : ['name', 'email', 'phone', 'company', 'website', 'type', 'category', 'industries', 'services', 'region']
+
+    const missing = requiredFields.filter((f) => !data[f])
+    if (missing.length) {
+      return res
+        .status(400)
+        .json({ success: false, error: `Missing fields: ${missing.join(', ')}` })
+    }
+
+    console.log(`📝 New ${formType} registration`, {
       name: data.name,
       email: data.email,
       company: data.company,
-      timestamp: new Date().toISOString()
     })
 
-    // Get environment variables
-    const env = {
-      SMTP_HOST: process.env.SMTP_HOST,
-      SMTP_PORT: process.env.SMTP_PORT,
-      SMTP_SECURE: process.env.SMTP_SECURE,
-      SMTP_USER: process.env.SMTP_USER,
-      SMTP_PASS: process.env.SMTP_PASS,
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-      EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME,
-      EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS,
-    }
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@x4et.com'
 
-    // Check if SMTP is configured
-    const isEmailConfigured = env.SMTP_USER && env.SMTP_PASS && env.SMTP_HOST
-
-    if (!isEmailConfigured) {
-      console.warn('⚠️  Email not configured. Skipping email sending.')
-      console.log('💡 To enable emails, configure SMTP settings in environment variables')
-
-      return c.json({
-        success: true,
-        message: 'Form submitted successfully (emails not configured)',
-        emailsSkipped: true,
-        data: {
-          formType,
-          name: data.name,
-          email: data.email,
-          company: data.company
+    /* -------- Fire & Forget Emails -------- */
+    setImmediate(async () => {
+      try {
+        if (formType === 'buyer') {
+          await sendMail({
+            to: data.email,
+            subject: 'Welcome to X4ET – Registration Confirmed',
+            html: getBuyerThankYouEmail(data),
+          })
+        } else {
+          await sendMail({
+            to: data.email,
+            subject: 'Welcome to X4ET Provider Network',
+            html: getProviderThankYouEmail(data),
+          })
         }
-      })
-    }
 
-    // Send emails in background (non-blocking with timeout)
-    const adminEmail = env.ADMIN_EMAIL || 'admin@x4et.com'
-
-    // Fire and forget - don't wait for emails to complete
-    const emailPromises = []
-
-    if (formType === 'buyer') {
-      emailPromises.push(
-        sendEmail(
-          data.email,
-          'Welcome to X4ET - Your Registration is Confirmed',
-          getBuyerThankYouEmail(data),
-          env
-        ).catch(err => {
-          console.error('User email failed:', err)
-          return false
+        await sendMail({
+          to: adminEmail,
+          subject: `New ${formType.toUpperCase()} Registration – ${data.name}`,
+          html: getAdminNotificationEmail(formType, data),
         })
-      )
-    } else if (formType === 'provider') {
-      emailPromises.push(
-        sendEmail(
-          data.email,
-          'Welcome to X4ET Provider Network',
-          getProviderThankYouEmail(data),
-          env
-        ).catch(err => {
-          console.error('User email failed:', err)
-          return false
-        })
-      )
-    }
 
-    emailPromises.push(
-      sendEmail(
-        adminEmail,
-        `New ${formType === 'buyer' ? 'Buyer' : 'Provider'} Registration - ${data.name} (${data.company})`,
-        getAdminNotificationEmail(formType, data),
-        env
-      ).catch(err => {
-        console.error('Admin email failed:', err)
-        return false
-      })
-    )
-
-    // Send emails in background - don't wait
-    Promise.all(emailPromises).then(results => {
-      console.log(`✉️  Email results: User=${results[0]}, Admin=${results[1]}`)
+        console.log('✉️ Emails sent successfully')
+      } catch (err) {
+        console.error('❌ Email sending failed:', err.message)
+      }
     })
 
-    // Return immediately without waiting for emails
-    return c.json({
+    return res.json({
       success: true,
-      message: 'Form submitted successfully. Emails are being sent.',
-      emailsQueued: true,
+      message: 'Form submitted successfully. Emails queued.',
       data: {
         formType,
         name: data.name,
         email: data.email,
-        company: data.company
-      }
+        company: data.company,
+      },
     })
   } catch (error) {
-    console.error('Form submission error:', error)
-    return c.json({ success: false, error: 'Internal server error' }, 500)
+    console.error('Form error:', error)
+    return res.status(500).json({ success: false, error: 'Internal server error' })
   }
+}
+
+/* -------------------- Routes -------------------- */
+app.post('/api/registrations/buyer', (req, res) =>
+  handleFormSubmission(res, 'buyer', req.body)
+)
+
+app.post('/api/registrations/provider', (req, res) =>
+  handleFormSubmission(res, 'provider', req.body)
+)
+
+app.post('/api/submit-form', (req, res) => {
+  const { formType, data } = req.body
+  if (!formType || !data) {
+    return res.status(400).json({ success: false, error: 'formType and data required' })
+  }
+  handleFormSubmission(res, formType, data)
 })
 
-const port = parseInt(process.env.PORT || '3001')
-console.log(`🚀 Backend server starting on http://localhost:${port}`)
+/* -------------------- Start Server -------------------- */
+const port = Number(process.env.PORT || 3002)
+const server = http.createServer(app)
 
-serve({
-  fetch: app.fetch,
-  port
+server.listen(port, () => {
+  console.log(`🚀 Backend running on http://localhost:${port}`)
 })

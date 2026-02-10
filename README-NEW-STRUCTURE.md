@@ -49,14 +49,14 @@ cp .env.example .env
 npm start
 ```
 
-The backend will run on `http://localhost:3001`
+The backend will run on `http://localhost:3002`
 
 #### Backend Environment Variables
 
 Edit `backend/.env`:
 
 ```env
-PORT=3001
+PORT=3002
 FRONTEND_URL=http://localhost:5173
 
 # SMTP Configuration (e.g., Gmail)
@@ -115,7 +115,7 @@ Then open your browser to `http://localhost:5173`
 
 ### Backend API
 
-**Base URL:** `http://localhost:3001`
+**Base URL:** `http://localhost:3002`
 
 #### POST `/api/submit-form`
 
@@ -187,12 +187,12 @@ To make changes to the backend:
 
 The frontend automatically detects the environment:
 
-- **Development:** Uses `http://localhost:3001`
+- **Development:** Uses `http://localhost:3002`
 - **Production:** Update `API_URL` in `frontend/public/static/app.js`
 
 ```javascript
 const API_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:3001'
+  ? 'http://localhost:3002'
   : 'https://your-backend-api.com'; // Update this
 ```
 
@@ -226,7 +226,7 @@ Deploy the `frontend/` folder to any static hosting:
 2. Update `frontend/public/static/app.js`:
    ```javascript
    const API_URL = window.location.hostname === 'localhost'
-     ? 'http://localhost:3001'
+     ? 'http://localhost:3002'
      : 'https://x4et-backend.up.railway.app';
    ```
 3. Build frontend: `cd frontend && npm run build`
@@ -249,7 +249,7 @@ Set `FRONTEND_URL` environment variable in your backend hosting provider to your
 
 ### Form submission fails
 
-1. Check backend is running on port 3001
+1. Check backend is running on port 3002
 2. Check browser console for error messages
 3. Verify API_URL in `app.js` is correct
 4. Check CORS settings in backend
@@ -272,10 +272,10 @@ Set `FRONTEND_URL` environment variable in your backend hosting provider to your
 
 ```bash
 # Health check
-curl http://localhost:3001/health
+curl http://localhost:3002/health
 
 # Test form submission
-curl -X POST http://localhost:3001/api/submit-form \
+curl -X POST http://localhost:3002/api/submit-form \
   -H "Content-Type: application/json" \
   -d '{
     "formType": "buyer",

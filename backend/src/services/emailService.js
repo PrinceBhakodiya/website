@@ -1,121 +1,109 @@
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
 
-/**
- * Email Service using Nodemailer
- * Supports SMTP, Gmail, and other email providers
- */
-export class EmailService {
-  constructor(config) {
-    this.config = config
-
-    this.transporter = nodemailer.createTransport({
-      host: config.host,
-      port: config.port,
-      secure: config.secure, // true for 465, false for other ports
-      auth: {
-        user: config.auth.user,
-        pass: config.auth.pass,
-      },
-    })
+// Validate SMTP configuration
+const validateSMTPConfig = () => {
+  const requiredVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'];
+  const missing = requiredVars.filter(varName => !process.env[varName]);
+  
+  if (missing.length > 0) {
+    throw new Error(
+      `SMTP configuration is incomplete. Missing environment variables: ${missing.join(', ')}. ` +
+      `Please set these in your .env file.`
+    );
   }
-
-  /**
-   * Send a single email with timeout
-   */
-  async sendEmail(options, timeoutMs = 10000) {
-    try {
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Email timeout')), timeoutMs)
-      })
-
-      const info = await Promise.race([
-        this.transporter.sendMail({
-          from: `"${this.config.from.name}" <${this.config.from.email}>`,
-          to: options.to,
-          subject: options.subject,
-          html: options.html,
-          text: options.text || '',
-        }),
-        timeoutPromise,
-      ])
-
-      console.log('📧 Email sent:', info.messageId)
-      return true
-    } catch (error) {
-      console.error('❌ Email sending failed:', error)
-      return false
-    }
+  
+  // Validate port is a number
+  const port = parseInt(process.env.SMTP_PORT, 10);
+  if (isNaN(port)) {
+    throw new Error(`SMTP_PORT must be a valid number, got: ${process.env.SMTP_PORT}`);
   }
-
-  /**
-   * Send multiple emails (with delay to avoid rate limiting)
-   */
-  async sendBulkEmails(emails, delayMs = 100) {
-    let success = 0
-    let failed = 0
-
-    for (const email of emails) {
-      const result = await this.sendEmail(email)
-      if (result) success++
-      else failed++
-
-      if (delayMs > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs))
-      }
-    }
-
-    return { success, failed }
+  
+  // Determine secure setting: use SMTP_SECURE if provided, otherwise check port
+  let secure = false;
+  if (process.env.SMTP_SECURE !== undefined) {
+    secure = process.env.SMTP_SECURE === 'true' || process.env.SMTP_SECURE === true;
+  } else {
+    secure = port === 465; // Default: secure for port 465
   }
-
-  /**
-   * Verify SMTP connection
-   */
-  async verifyConnection() {
-    try {
-      await this.transporter.verify()
-      console.log('✅ SMTP connection verified')
-      return true
-    } catch (error) {
-      console.error('❌ SMTP verification failed:', error)
-      return false
-    }
-  }
-
-  /**
-   * Close transporter
-   */
-  close() {
-    this.transporter.close()
-  }
-}
-
-/**
- * Factory function to create EmailService from env vars
- */
-export function createEmailService(env) {
-  const config = {
-    host: env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(env.SMTP_PORT || 587),
-    secure: env.SMTP_SECURE === 'true', // true for 465
+  
+  return {
+    host: process.env.SMTP_HOST,
+    port: port,
+    secure: secure,
     auth: {
-      user: env.SMTP_USER || '',
-      pass: env.SMTP_PASS || '',
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
-    from: {
-      name: env.EMAIL_FROM_NAME || 'X4ET Platform',
-      email: env.EMAIL_FROM_ADDRESS || 'noreply@x4et.com',
-    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  };
+};
+
+// Lazy initialization - create transporter on first use
+let transporter = null;
+let initializationAttempted = false;
+
+const getTransporter = () => {
+  // If already initialized successfully, return it
+  if (transporter) {
+    return transporter;
   }
+  
+  // If we've already tried and failed, throw the error
+  if (initializationAttempted && !transporter) {
+    const missing = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM']
+      .filter(varName => !process.env[varName]);
+    throw new Error(
+      `SMTP is not configured. Missing environment variables: ${missing.join(', ')}. ` +
+      `Please set these in your .env file and restart the server.`
+    );
+  }
+  
+  // Try to initialize
+  initializationAttempted = true;
+  try {
+    const config = validateSMTPConfig();
+    transporter = nodemailer.createTransport(config);
+    console.log('SMTP transporter initialized successfully');
+    return transporter;
+  } catch (error) {
+    console.error('SMTP configuration error:', error.message);
+    // Log which variables are actually set for debugging
+    console.error('SMTP environment variables status:', {
+      SMTP_HOST: process.env.SMTP_HOST ? '✓' : '✗',
+      SMTP_PORT: process.env.SMTP_PORT ? '✓' : '✗',
+      SMTP_USER: process.env.SMTP_USER ? '✓' : '✗',
+      SMTP_PASS: process.env.SMTP_PASS ? '✓' : '✗',
+      SMTP_FROM: process.env.SMTP_FROM ? '✓' : '✗',
+    });
+    throw error;
+  }
+};
 
-  return new EmailService(config)
-}
-
-/**
- * Quick send helper (fire-and-forget friendly)
- */
-export async function sendEmail(to, subject, html, env) {
-  const emailService = createEmailService(env)
-  const result = await emailService.sendEmail({ to, subject, html })
-  emailService.close()
-  return result
-}
+export const sendMail = async ({ to, subject, html }) => {
+  // Validate required fields
+  if (!to || !subject || !html) {
+    throw new Error('Missing required email fields: to, subject, or html');
+  }
+  
+  // Get or create transporter (lazy initialization)
+  const mailTransporter = getTransporter();
+  
+  try {
+    return await mailTransporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error('Error sending email:', {
+      error: error.message,
+      code: error.code,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+    });
+    throw error;
+  }
+};
