@@ -551,13 +551,7 @@ app.get("/", (c) => {
       ] }),
       /* @__PURE__ */ jsx("section", { className: "trust-section", children: /* @__PURE__ */ jsxs("div", { className: "container", children: [
         /* @__PURE__ */ jsx("p", { className: "trust-title", children: "Trusted by industry leaders in Oil & Gas, Mining, Power & Manufacturing" }),
-        /* @__PURE__ */ jsxs("div", { className: "trust-logos", children: [
-          /* @__PURE__ */ jsx("div", { className: "trust-logo", children: "Shell" }),
-          /* @__PURE__ */ jsx("div", { className: "trust-logo", children: "BP" }),
-          /* @__PURE__ */ jsx("div", { className: "trust-logo", children: "Rio Tinto" }),
-          /* @__PURE__ */ jsx("div", { className: "trust-logo", children: "GE Power" }),
-          /* @__PURE__ */ jsx("div", { className: "trust-logo", children: "Siemens" })
-        ] })
+  
       ] }) }),
       /* @__PURE__ */ jsx("section", { id: "challenge", className: "problem-section", children: /* @__PURE__ */ jsxs("div", { className: "container", children: [
         /* @__PURE__ */ jsx("h2", { className: "section-title", children: "Why Technology Adoption Stalls" }),

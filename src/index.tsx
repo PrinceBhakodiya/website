@@ -165,13 +165,7 @@ app.get('/', (c) => {
       <section className="trust-section">
         <div className="container">
           <p className="trust-title">Trusted by industry leaders in Oil & Gas, Mining, Power & Manufacturing</p>
-          {/* <div className="trust-logos">
-            <div className="trust-logo">Shell</div>
-            <div className="trust-logo">BP</div>
-            <div className="trust-logo">Rio Tinto</div>
-            <div className="trust-logo">GE Power</div>
-            <div className="trust-logo">Siemens</div>
-          </div> */}
+  
         </div>
       </section>
 
