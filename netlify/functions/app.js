@@ -592,7 +592,7 @@ app.get("/", (c) => {
             /* @__PURE__ */ jsx("div", { className: "testimonial-content", children: /* @__PURE__ */ jsx("p", { className: "testimonial-text", children: '"X4ET helped us find the perfect AI vision system in just 2 weeks. Previously, this would have taken us 6 months. The pre-vetted providers saved us countless evaluation hours."' }) }),
             /* @__PURE__ */ jsx("div", { className: "testimonial-author", children: /* @__PURE__ */ jsxs("div", { className: "author-info", children: [
               /* @__PURE__ */ jsx("div", { className: "author-name", children: "Sarah Chen" }),
-              /* @__PURE__ */ jsx("div", { className: "author-title", children: "VP of Innovation, Shell Energy" })
+              /* @__PURE__ */ jsx("div", { className: "author-title", children: "VP of Innovation, NDS Technologies" })
             ] }) })
           ] }),
           /* @__PURE__ */ jsxs("div", { className: "testimonial-card", children: [
